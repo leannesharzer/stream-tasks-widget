@@ -26,10 +26,10 @@
     <canvas class="confetti" id="confetti"></canvas>
 
     <script>
-        const SHEET_ID = "6HdFhnDdTtXjqhkqVCWUUPfgJaCLRew49KPzG4f2Euo";
+        const SHEET_ID = "16HdFhnDdTtXjqhkqVCWUUPfgJaCLRew49KPzG4f2Euo";
         const API_KEY = "AIzaSyDs9XXzkSqzoP38qo0vGLPzHhWOCfzp27E";
-        const RANGE = "Sheet1!A2:B";
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx-tFKsIw7RUp1ISHQx-hRfk_8JcDkaGbtflqXyyFgWisJRLhPAulZQpz1X7Uty6_-u/exec"; // Google Apps Script URL
+        const RANGE = "Sheet1!A2:C";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw-0vEuwsE9thJTqDb7X1ErARsxHPLAKd8a2xdcvhRWGgW_iZ1Nsa0AAXL0YX1_aluO/exec";
 
         async function fetchTasks() {
             const url = https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?key=${API_KEY};
@@ -46,74 +46,53 @@
             const taskList = document.getElementById("task-list");
             taskList.innerHTML = "";
             tasks.forEach(task => {
-                const [description, status] = task;
+                const [username, description, status] = task;
                 const taskDiv = document.createElement("div");
                 taskDiv.className = task ${status === "Completed" ? "completed" : ""};
                 taskDiv.innerHTML = `
-                    <p>${description}</p>
-                    <button class="complete-btn" onclick="markComplete('${description}')">Complete</button>
+                    <p><strong>${username}</strong>: ${description}</p>
                 `;
                 taskList.appendChild(taskDiv);
             });
         }
 
-        function markComplete(taskDescription) {
-            alert(Task Completed: ${taskDescription});
-            triggerConfetti();
-        }
-
-        function addTask(taskDescription) {
+        function addTask(username, taskDescription) {
             fetch(SCRIPT_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ task: taskDescription })
+                body: JSON.stringify({ username: username, task: taskDescription })
             })
             .then(response => response.json())
             .then(data => {
-                console.log("Task added: ", data);
+                console.log(Task added by ${username}: ${taskDescription});
                 fetchTasks();
             })
             .catch(error => console.error("Error adding task:", error));
         }
 
-        function triggerConfetti() {
-            const confettiCanvas = document.getElementById("confetti");
-            const confettiContext = confettiCanvas.getContext("2d");
-            confettiCanvas.width = window.innerWidth;
-            confettiCanvas.height = window.innerHeight;
+        function listenForTaskCommand(message) {
+            const commandPrefix = "!task ";
+            if (message.startsWith(commandPrefix)) {
+                const content = message.replace(commandPrefix, "").trim();
+                const parts = content.split(" ");
+                const username = parts.shift();
+                const taskDescription = parts.join(" ");
 
-            let confetti = [];
-            const colors = ["#FF5733", "#33FF57", "#3357FF", "#FF33A1", "#FFD733"];
-
-            for (let i = 0; i < 150; i++) {
-                confetti.push({
-                    x: Math.random() * confettiCanvas.width,
-                    y: Math.random() * confettiCanvas.height - confettiCanvas.height,
-                    size: Math.random() * 12 + 5,
-                    speed: Math.random() * 5 + 2,
-                    color: colors[Math.floor(Math.random() * colors.length)]
-                });
+                if (taskDescription.length > 0) {
+                    addTask(username, taskDescription);
+                }
             }
-
-            function drawConfetti() {
-                confettiContext.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-                confetti.forEach((c, index) => {
-                    confettiContext.fillStyle = c.color;
-                    confettiContext.fillRect(c.x, c.y, c.size, c.size);
-                    c.y += c.speed;
-
-                    if (c.y > confettiCanvas.height) confetti[index].y = -10;
-                });
-                requestAnimationFrame(drawConfetti);
-            }
-
-            drawConfetti();
         }
+
+        // Example Command Trigger for Testing
+        // You can run this in the console to simulate a command:
+        // listenForTaskCommand("!task Viewer123 Complete the report");
 
         fetchTasks();
         setInterval(fetchTasks, 5000);
+
     </script>
 </body>
 </html>
