@@ -29,7 +29,7 @@
         const SHEET_ID = "16HdFhnDdTtXjqhkqVCWUUPfgJaCLRew49KPzG4f2Euo";
         const API_KEY = "AIzaSyDs9XXzkSqzoP38qo0vGLPzHhWOCfzp27E";
         const RANGE = "Sheet1!A2:C";
-        const SCRIPT_URL = "https://script.google.com/u/0/home/projects/1tlKeFjkqS7g2y4iRluwNWn5DTHd-CmBtoFiZzytHDADjNcWoE9S0bRpF/edit";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzLng4WG4S2CXFL8EkJDr0_1k4MnsjrCYmgti7CgldxGW5-QKT4ciH6KGan8ISLWIMY/exec;
 
         async function fetchTasks() {
             const url = https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?key=${API_KEY};
@@ -83,6 +83,7 @@
         }
     }
 }
+
     }
 }";  // Streamlabs will replace {user} with the actual username
             addTask(username, taskDescription);
