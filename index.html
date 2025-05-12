@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viewer Task Submission</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Roboto', sans-serif; background-color: #1e1e1e; color: #fff; padding: 20px; }
+        .task-container { width: 100%; max-width: 600px; margin: 0 auto; }
+        .task { background-color: #333; padding: 15px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .task.completed { text-decoration: line-through; opacity: 0.6; }
+        .task p { margin: 0; }
+        .complete-btn { background-color: #4CAF50; border: none; padding: 5px 10px; cursor: pointer; color: #fff; border-radius: 5px; }
+        .complete-btn:hover { background-color: #45a049; }
+        .confetti { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+    </style>
+</head>
+<body>
+    <div class="task-container">
+        <h2>Viewer Submitted Tasks</h2>
+        <div id="task-list"></div>
+    </div>
+    <canvas class="confetti" id="confetti"></canvas>
+
+    <script>
+        const SHEET_ID = "16HdFhnDdTtXjqhkqVCWUUPfgJaCLRew49KPzG4f2Euo";
+        const API_KEY = "AIzaSyDs9XXzkSqzoP38qo0vGLPzHhWOCfzp27E";
+        const RANGE = "Sheet1!A2:B";
+
+        async function fetchTasks() {
+            const url = https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?key=${API_KEY};
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                renderTasks(data.values);
+            } catch (error) {
+                console.error("Error fetching tasks:", error);
+            }
+        }
+
+        function renderTasks(tasks) {
+            const taskList = document.getElementById("task-list");
+            taskList.innerHTML = "";
+            tasks.forEach(task => {
+                const [description, status] = task;
+                const taskDiv = document.createElement("div");
+                taskDiv.className = task ${status === "Completed" ? "completed" : ""};
+                taskDiv.innerHTML = `
+                    <p>${description}</p>
+                    <button class="complete-btn" onclick="markComplete('${description}')">Complete</button>
+                `;
+                taskList.appendChild(taskDiv);
+            });
+        }
+
+        function markComplete(taskDescription) {
+            alert(Task Completed: ${taskDescription});
+            triggerConfetti();
+        }
+
+        function triggerConfetti() {
+            const confettiCanvas = document.getElementById("confetti");
+            const confettiContext = confettiCanvas.getContext("2d");
+            confettiCanvas.width = window.innerWidth;
+            confettiCanvas.height = window.innerHeight;
+
+            let confetti = [];
+            const colors = ["#FF5733", "#33FF57", "#3357FF", "#FF33A1", "#FFD733"];
+
+            for (let i = 0; i < 100; i++) {
+                confetti.push({
+                    x: Math.random() * confettiCanvas.width,
+                    y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+                    size: Math.random() * 10 + 5,
+                    speed: Math.random() * 3 + 2,
+                    color: colors[Math.floor(Math.random() * colors.length)]
+                });
+            }
+
+            function drawConfetti() {
+                confettiContext.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+                confetti.forEach((c, index) => {
+                    confettiContext.fillStyle = c.color;
+                    confettiContext.fillRect(c.x, c.y, c.size, c.size);
+                    c.y += c.speed;
+
+                    if (c.y > confettiCanvas.height) confetti[index].y = -10;
+                });
+                requestAnimationFrame(drawConfetti);
+            }
+
+            drawConfetti();
+        }
+
+        fetchTasks();
+        setInterval(fetchTasks, 5000);
+    </script>
+</body>
+</html>
